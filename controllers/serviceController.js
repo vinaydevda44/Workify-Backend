@@ -3,7 +3,9 @@ const Service= require('../models/Service');
 // Create a new service
 exports.createService= async(req,res)=>{
     try{
-        const {name,description,price}=req.body;
+        const {name,description,price,}=req.body;
+
+       
 
     if(!name || !description || !price){
         return res.status(400).json({
@@ -11,21 +13,20 @@ exports.createService= async(req,res)=>{
             message:"Please Provide all the details",
         })
     }
-    console.log("sb shi hai")
     const service = await Service.create({
         name,
         description,
         price,
         provider:req.user.id,
     });
-    return res.status(201).json({
+    return res.status(200).json({
         success:true,
         message:"Service created Successfully",
         service,
     })
     }
     catch(error){
-        console.error('Error creating service',error);
+        console.log('Error creating service',error);
         return res.status(500).json({
             success:false,
             message:"Something went wrong",

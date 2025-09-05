@@ -1,10 +1,12 @@
 const express= require('express');
 const router=express.Router();
 
-const {createService}=require('../controllers/serviceController');
-const {auth}=require("../middleware/authMiddleware");
+const {createService,getAllServices,getServiceById}=require('../controllers/serviceController');
+const {auth,isProvider,}=require("../middleware/authMiddleware");
 
 
-router.post('/create-service',auth,createService);
+router.post('/create-service',auth,isProvider,createService);
+router.get('/getAllServices',getAllServices);
+router.get('/getServiceById/:id',auth,getServiceById);
 
 module.exports=router;

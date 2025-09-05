@@ -6,8 +6,8 @@ const User= require('../models/User');
 
 exports.createBooking= async(req,res)=>{
     try{
-        const {serviceId,bookingDate,userId,providerId}=req.body;
-        if(!serviceId || !bookingDate || !userId || !providerId){
+        const {serviceId,userId,providerId}=req.body;
+        if(!serviceId || !userId || !providerId){
             return res.status(400).json({
                 success:false,
                 message:"All field are required",
@@ -39,7 +39,7 @@ exports.createBooking= async(req,res)=>{
             })
         }
 
-        const bookingPayload={serviceId,bookingDate,userId,providerId};
+        const bookingPayload={serviceId,userId,providerId};
 
         const newBooking= await Booking.create(bookingPayload);
 
@@ -99,7 +99,7 @@ exports.getUserBookings= async(req,res)=>{
 
 // Get bookings for a provider
 
-exports.getProviderBookings- async(req,res)=>{
+exports.getProviderBookings= async(req,res)=> {
     try{
         const{providerId}=req.params;
         if(!providerId){
@@ -169,48 +169,6 @@ exports.updateBookingStatus= async(req,res)=>{
     }
     catch(error){
         console.error("Error in updating booking status",error);
-        return res.status(500).json({
-            success:false,
-            message:"Internal server error",
-        })
-    }
-}
-
-// Cancel a booking
-exports.cancelBooking= async(req,res)=>{
-    try{
-        const {bookingId}=req.params;
-        if(!bookingId){
-            return res.status(400).json({
-                success:false,
-                message:"Booking Id is required",
-            })
-        }
-
-        const booking= await Booking.findById(bookingId);
-        if(!booking){
-            return res.status(400).json({
-                success:false,
-                message:"Booking not found",
-            })
-        }
-        if(booking.status==="Cancelled"){
-            return res.status(400).json({
-                success:false,
-                message:"Booking is already cancelled",
-            })
-        }
-
-        booking.status="Cancelled";
-        await booking.save();
-        return res.status(200).json({
-            success:true,
-            message:"Booking cancelled successfully",
-            booking,
-        })
-    }
-    catch(error){
-        console.error("Error in cancelling booking",error);
         return res.status(500).json({
             success:false,
             message:"Internal server error",
