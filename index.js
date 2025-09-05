@@ -13,10 +13,13 @@ DATABASE.dbConnect();
 const userRoutes = require('./routes/userRoute');
 const serviceRoutes=require('./routes/serviceRoute');
 const bookingRoutes=require('./routes/bookingRoute');
+const reviewRoutes=require('./routes/reviewRoute');
+
 
 app.use('/api/auth',userRoutes);
 app.use('/api/service',serviceRoutes);
 app.use('/api/booking',bookingRoutes);
+app.use('/api/review',reviewRoutes);
 
 const PORT = process.env.PORT || 4000;
 
