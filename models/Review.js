@@ -5,11 +5,6 @@ const reviewSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',required:true
     },
-    serviceId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Service',
-        required:true
-    },
     providerId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',

@@ -7,7 +7,7 @@ const Category= require('../models/Category');
 // Create a new service
 exports.createService = async (req, res) => {
   try {
-    const { name, description, price,categoryId } = req.body;
+    const { name, description, price,categoryId} = req.body;
     const userId = req.user.id;
 
     // Fetch user to check role
