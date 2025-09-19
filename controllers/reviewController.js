@@ -2,43 +2,45 @@ const Review =require('../models/Review');
 const Service= require('../models/Service');
 const User= require('../models/User');
 
-// Add a review for a service
+// Add a review for a provider
 
 exports.createReview= async(req,res)=>{
     try{
-        const {serviceId,rating,comment}=req.body;
-        const userId=req.user.id;
-        if(!serviceId || !rating){
+        const {providerId,serviceId,rating,comment}=req.body;
+        if(!providerId || !serviceId || !rating || !comment){
             return res.status(400).json({
                 success:false,
-                message:"Service ID and rating are required",
+                message:"All fields are required",
+            })
+        }   
+        // Check if provider exists
+        const provider= await User.findById(providerId);
+        if(!provider){
+            return res.status(404).json({
+                success:false,
+                message:"Provider not found",
             })
         }
-
-        const service = await Service.findById(serviceId);
+        // Check if service exists
+        const service= await Service.findById(serviceId);
         if(!service){
-            return res.status(400).json({
+            return res.status(404).json({
                 success:false,
                 message:"Service not found",
             })
         }
-        const providerId= service.provider;
-        const user= await User.findById(userId);
-        if(!user){
-            return res.status(400).json({
-                success:false,
-                message:"User not found",
-            })
-        }
-
-        const reviewPayload={userId,serviceId,providerId,rating,comment};
-
-        const newReview = await Review.create(reviewPayload);
-
-        return res.status(200).json({
+        const userId=req.user.id; 
+        const newReview= await Review.create({
+            userId,
+            providerId,
+            serviceId,
+            rating,
+            comment,
+        });
+        return res.status(201).json({
             success:true,
             message:"Review added successfully",
-            newReview, 
+            newReview,
         })
 
     }
@@ -47,6 +49,39 @@ exports.createReview= async(req,res)=>{
         return res.status(401).json({
             status:false,
             message:"Internal server error ",
+        })
+    }
+}
+
+// get all reviews for a service
+
+exports.getReviewsByServiceId= async(req,res)=>{
+    try{
+        const {serviceId}=req.params;
+        if(!serviceId){
+            return res.status(400).json({
+                success:false,
+                message:"Service Id is required",
+            })
+        }
+        const reviews = await Review.find({serviceId}).populate('userId','name email').sort({createdAt:-1});
+        if(!reviews){
+            return res.status(404).json({
+                success:false,
+                message:"No reviews found for this service",
+            })
+        }
+        return res.status(200).json({
+            success:true,
+            reviews,
+        })  
+        
+    }
+    catch(error){
+        console.error("error fetching reviews",error);
+        return res.status(500).json({
+            success:false,
+            message:"Something went wrong",
         })
     }
 }

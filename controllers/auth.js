@@ -13,7 +13,7 @@ exports.signUp = async (req, res) => {
     const { name, email, password, phone, role, otp } = req.body;
 
     // validation
-    if (!name || !email || !password || !phone || !role || !otp ) {
+    if (!name || !email || !password || !phone || !role || !otp) {
       return res.status(400).json({
         success: false,
         message: "Please fill all the fields",
@@ -29,41 +29,39 @@ exports.signUp = async (req, res) => {
       });
     }
 
-    //verify otp
-    const recentOtp= await OTP.find({email}).sort({createdAt:-1}).limit(1);
-
-    if(recentOtp.length==0){
+    // verify otp
+    const recentOtp = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+    if (recentOtp.length === 0 || otp !== recentOtp[0].otp) {
       return res.status(400).json({
-        success:false,
-        message:"The OTP is not valid",
-      })
-    }
-    else if(otp !== recentOtp[0].otp){
-      return res.status(400).json({
-        success:false,
-        message:"The OTP is not valid",
+        success: false,
+        message: "The OTP is not valid",
       });
     }
-
-    const profileDetails=await Profile.create({
-      location:null,
-      gender:null,
-      profilePicture:null,
-      dateOfBirth:null
-    })
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create user
+   
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
       phone,
-      additionalInfo:profileDetails._id,
       role,
     });
+
+
+    const profileDetails = await Profile.create({
+      user: newUser._id,
+      location: null,
+      gender: null,
+      profilePicture: null,
+      dateOfBirth: null,
+    });
+
+   
+    newUser.additionalInfo = profileDetails._id;
+    await newUser.save();
 
     return res.status(201).json({
       success: true,
@@ -77,6 +75,7 @@ exports.signUp = async (req, res) => {
     });
   }
 };
+
 
 exports.login = async (req, res) => {
   try {

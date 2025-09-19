@@ -22,6 +22,9 @@ const userSchema = new mongoose.Schema({
     services:[{type:mongoose.Schema.Types.ObjectId, 
         ref:"Service",
     }],
+    image:{
+        type:String,
+    },
     additionalInfo:{type:mongoose.Schema.Types.ObjectId,
         ref:"Profile",
     },

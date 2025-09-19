@@ -1,9 +1,22 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
-
 const app = express();
+const cookieParser = require("cookie-parser");
+const fileUpload= require('express-fileupload');
+require('dotenv').config();
+
+
+app.use(fileUpload({
+  useTempFiles:true,
+  tempFileDir:'/tmp/'
+}));
+
+
 app.use(express.json());
 app.use(cookieParser());
+
+//CLOUDINARY CONNECTION
+const CLOUDINARY= require("./config/cloudinary");
+CLOUDINARY.cloudinaryConnect();
 
 //Database connection
 const DATABASE = require('./config/db');

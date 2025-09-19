@@ -4,61 +4,76 @@ const User= require('../models/User');
 
 // Create a new booking
 
-exports.createBooking= async(req,res)=>{
-    try{
-        const {serviceId,userId,providerId}=req.body;
-        if(!serviceId || !userId || !providerId){
+exports.createBooking = async (req, res) => {
+    try {
+        const { serviceId, providerId } = req.body;
+        const userId = req.user.id; 
+
+        if (!serviceId || !providerId) {
             return res.status(400).json({
-                success:false,
-                message:"All field are required",
-            })
+                success: false,
+                message: "ServiceId and ProviderId are required",
+            });
         }
+
         // Check if service exists
         const service = await Service.findById(serviceId);
-        if(!service){
+        if (!service) {
             return res.status(404).json({
-                success:false,
-                message:"Service not found",
-            })
+                success: false,
+                message: "Service not found",
+            });
         }
-        
+
         // Check if user exists
-        const user= await User.findById(userId);
-        if(!user){
+        const user = await User.findById(userId);
+        if (!user) {
             return res.status(404).json({
-                success:false,
-                message:"User not found",
-            })
-        }
-        // Check if provider exists
-        const provider= await User.findById(providerId);        
-        if(!provider){
-            return res.status(404).json({
-                success:false,
-                message:"Provider not found",
-            })
+                success: false,
+                message: "User not found",
+            });
         }
 
-        const bookingPayload={serviceId,userId,providerId};
+        // Check if provider exists and is a provider
+        const provider = await User.findById(providerId);
+        if (!provider || provider.role !== "provider") {
+            return res.status(404).json({
+                success: false,
+                message: "Provider not found or invalid",
+            });
+        }
 
-        const newBooking= await Booking.create(bookingPayload);
+        // Optional: check duplicate booking
+        const existingBooking = await Booking.findOne({ service: serviceId, user: userId });
+        if (existingBooking) {
+            return res.status(400).json({
+                success: false,
+                message: "You already booked this service",
+            });
+        }
+
+        const newBooking = await Booking.create({
+            service: serviceId,
+            user: userId,
+            provider: providerId,
+            status: "pending",
+            createdAt: new Date(),
+        });
 
         return res.status(201).json({
-            success:true,
-            message:"Booking created successfully",
-            newBooking,
-        })
+            success: true,
+            message: "Booking created successfully",
+            booking: newBooking,
+        });
 
-
-    }
-    catch(error){
-        console.error("Error in creating booking",error);
+    } catch (error) {
+        console.error("Error in creating booking", error);
         return res.status(500).json({
-            success:false,
-            message:"Internal server error",
-        })
+            success: false,
+            message: "Internal server error",
+        });
     }
-}
+};
 
 // Get bookings for a user
 

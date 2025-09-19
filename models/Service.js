@@ -14,6 +14,14 @@ const serviceSchema = new mongoose.Schema({
         ref:'User',
         required:true
     },
+    serviceImage:{
+        type:String,
+    },
+    category:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Category',
+        required:true
+    },
     price:{
         type:Number,
         required:true
